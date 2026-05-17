@@ -7,8 +7,13 @@ import firebaseAppletConfig from '../../firebase-applet-config';
 const getFirebaseConfig = () => {
   const env = import.meta.env;
   
-  // If API Key is provided via Env Var, use exclusively Env Vars (Production mode)
-  if (env.VITE_FIREBASE_API_KEY && env.VITE_FIREBASE_API_KEY !== 'REPLACE_ME') {
+  // If API Key is provided via Env Var and it's not a placeholder, use exclusively Env Vars (Production mode)
+  const isEnvValid = env.VITE_FIREBASE_API_KEY && 
+                    env.VITE_FIREBASE_API_KEY !== 'REPLACE_ME' && 
+                    env.VITE_FIREBASE_API_KEY.length > 20 &&
+                    !env.VITE_FIREBASE_API_KEY.includes('...');
+
+  if (isEnvValid) {
     return {
       apiKey: env.VITE_FIREBASE_API_KEY,
       authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -43,12 +48,18 @@ export const googleProvider = new GoogleAuthProvider();
 
 // Validation connection test
 async function testConnection() {
+  if (!firebaseConfig.apiKey) {
+    console.error("Firebase API Key is missing. Please check your configuration.");
+    return;
+  }
+  
   try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration.");
+    // Only test if we are in development or if explicitly requested
+    if (import.meta.env.DEV) {
+      await getDocFromServer(doc(db, 'test', 'connection'));
     }
+  } catch (error) {
+    console.warn("Initial Firebase connection check failed. This might be due to missing collections or restricted rules, but the app may still function if config is correct.", error);
   }
 }
 testConnection();
