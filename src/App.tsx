@@ -495,11 +495,36 @@ export default function App() {
     return language === 'si' ? cat.nameSi : language === 'ta' ? cat.nameTa : cat.nameEn;
   };
 
-  useEffect(() => {
-    if (user) {
-      console.log('Current User:', user.email, 'isAdmin:', isAdmin, 'verified:', user.emailVerified);
+  const handleLogin = async () => {
+    try {
+      await login();
+      setStatusMessage({ text: 'Successfully logged in!', type: 'success' });
+    } catch (error: unknown) {
+      console.error('Login error:', error);
+      let message = 'Login failed. Please check if popups are blocked.';
+      
+      if (error && typeof error === 'object' && 'code' in error) {
+        const authError = error as { code: string; message?: string };
+        if (authError.code === 'auth/popup-closed-by-user') {
+          message = 'Login popup was closed before completion.';
+        } else if (authError.code === 'auth/unauthorized-domain') {
+          message = 'This domain is not authorized in Firebase Console. Please add ' + window.location.hostname + ' to Authorized Domains.';
+        } else if (authError.message) {
+          message = authError.message;
+        }
+      }
+      setStatusMessage({ text: message, type: 'error' });
     }
-  }, [user, isAdmin]);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setStatusMessage({ text: 'Logged out.', type: 'success' });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const handleAddTerm = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -740,7 +765,7 @@ export default function App() {
 
             {user ? (
               <button 
-                onClick={logout}
+                onClick={handleLogout}
                 className="flex items-center gap-1 bg-white/20 hover:bg-white/30 px-2 py-1 md:px-3 rounded-lg text-[9px] md:text-sm transition-all whitespace-nowrap"
               >
                 <LogOut className="w-3 h-3 md:w-4 md:h-4" />
@@ -749,7 +774,7 @@ export default function App() {
               </button>
             ) : (
               <button 
-                onClick={login}
+                onClick={handleLogin}
                 className="flex items-center gap-1 bg-gov-gold text-gov-blue hover:bg-yellow-400 px-1.5 sm:px-4 py-1 sm:py-2 rounded-lg text-[9px] sm:text-sm font-bold transition-all"
               >
                 <LogIn className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -805,7 +830,7 @@ export default function App() {
             </button>
           ) : (
             <button 
-              onClick={login}
+              onClick={handleLogin}
               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gov-blue text-white hover:bg-blue-900 px-4 md:px-6 py-2.5 md:py-3 rounded-xl font-bold transition-all shadow-lg text-xs md:text-sm"
             >
               <LogIn className="w-4 h-4 md:w-5 md:h-5" />

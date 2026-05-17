@@ -57,7 +57,10 @@ npm start
 1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com).
 2. Enable **Firestore Database** and **Authentication** (Google Provider).
 3. Set up Firestore Security Rules using the provided `firestore.rules` file in this repository.
-4. Add your domain to the "Authorized domains" list in Firebase Auth settings.
+4. **CRITICAL: Authorized Domains**:
+   - Go to **Firebase Console** > **Authentication** > **Settings** > **Authorized domains**.
+   - Add your custom domain (e.g., `glossary.lk`) AND the Netlify subdomain (e.g., `your-app.netlify.app`) to the list.
+   - If you don't do this, Google Login will fail.
 
 ## License
 
