@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "Category": {
+      "title": "Category",
+      "description": "A linguistic category or department for glossary terms",
+      "type": "object",
+      "properties": {
+        "nameEn": { "type": "string", "description": "English name" },
+        "nameSi": { "type": "string", "description": "Sinhala name" },
+        "nameTa": { "type": "string", "description": "Tamil name" }
+      },
+      "required": ["nameEn", "nameSi", "nameTa"]
+    },
+    "GlossaryTerm": {
+      "title": "Glossary Term",
+      "description": "A multilingual glossary entry",
+      "type": "object",
+      "properties": {
+        "categoryId": { "type": "string", "description": "Reference to the category ID" },
+        "english": { "type": "string", "description": "English term" },
+        "sinhala": { "type": "string", "description": "Sinhala term" },
+        "tamil": { "type": "string", "description": "Tamil term" },
+        "description": { "type": "string", "description": "Optional definition or technical note" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["categoryId", "english", "sinhala", "tamil", "createdAt", "updatedAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "A user with administrative privileges",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Admin email address" }
+      },
+      "required": ["email"]
+    },
+    "Suggestion": {
+      "title": "Term Suggestion",
+      "description": "A suggestion for a new glossary term or modification",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who made the suggestion" },
+        "userEmail": { "type": "string", "description": "The email of the user who made the suggestion" },
+        "english": { "type": "string", "description": "Proposed English term" },
+        "sinhala": { "type": "string", "description": "Proposed Sinhala term" },
+        "tamil": { "type": "string", "description": "Proposed Tamil term" },
+        "notes": { "type": "string", "description": "Additional context or reason for suggestion" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"], "description": "Status of the suggestion" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userEmail", "english", "sinhala", "tamil", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Collection of term categories"
+    },
+    "/terms/{termId}": {
+      "schema": "GlossaryTerm",
+      "description": "Collection of multilingual glossary terms"
+    },
+    "/admins/{userId}": {
+      "schema": "Admin",
+      "description": "Whitelist of administrative users"
+    },
+    "/suggestions/{suggestionId}": {
+      "schema": "Suggestion",
+      "description": "Collection of visitor suggestions"
+    }
+  }
+}

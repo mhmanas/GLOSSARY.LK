@@ -1,0 +1,6 @@
+{
+  "name": "English-Sinhala-Tamil Glossary",
+  "description": "A comprehensive multilingual glossary application powered by TRANSLATION.LK.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
