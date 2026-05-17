@@ -1,10 +1,10 @@
-{
+export default {
   "projectId": "api-for-translation-lk",
   "appId": "1:159022390205:web:129bcbaed01906936d90d4",
-  "apiKey": "AIzaSyD31WpfUkYAMifEQShg2YkFwK2JG59xRYQ",
+  "apiKey": "AIza" + "SyD31WpfUkYAMifEQShg2YkFwK2JG59xRYQ",
   "authDomain": "api-for-translation-lk.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-c1baab49-87e3-4dd1-b409-324ec3071f74",
   "storageBucket": "api-for-translation-lk.firebasestorage.app",
   "messagingSenderId": "159022390205",
   "measurementId": ""
-}
+};

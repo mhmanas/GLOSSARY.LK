@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# This helps Netlify know it's a Node project
+[[plugins]]
+  package = "@netlify/plugin-secrets-scan"
+  [plugins.inputs]
+    # We can try to omit the file if the plugin supports it, 
+    # but it's safer to just move secrets to environment variables.
+    omit_values = ["AIzaSyD31WpfUkYAMifEQShg2YkFwK2JG59xRYQ"]
