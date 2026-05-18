@@ -70,6 +70,8 @@ export default function App() {
   const [statusMessage, setStatusMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 640 : false);
   const [isDeduplicating, setIsDeduplicating] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
@@ -262,6 +264,41 @@ export default function App() {
       handleFirestoreError(err, OperationType.DELETE, 'terms');
     } finally {
       setIsDeduplicating(false);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!isAdmin) return;
+    if (!confirmDeleteAll) {
+      setConfirmDeleteAll(true);
+      setStatusMessage({ text: 'Click "CONFIRM DELETE" to permanently erase ALL terms and categories.', type: 'error' });
+      setTimeout(() => setConfirmDeleteAll(false), 5000);
+      return;
+    }
+
+    setIsDeletingAll(true);
+    setConfirmDeleteAll(false);
+    setStatusMessage({ text: 'Wiping database...', type: 'success' });
+
+    try {
+      // Delete terms
+      const termSnap = await getDocs(query(collection(db, 'terms'), limit(10000)));
+      const categorySnap = await getDocs(query(collection(db, 'categories'), limit(1000)));
+
+      const batch = writeBatch(db);
+      termSnap.docs.forEach(d => batch.delete(d.ref));
+      categorySnap.docs.forEach(d => batch.delete(d.ref));
+      
+      await batch.commit();
+      
+      setTerms([]);
+      setCategories([]);
+      setStatusMessage({ text: 'Database wiped successfully. You can now use "Seed Initial Data" or import a CSV.', type: 'success' });
+    } catch (err) {
+      console.error('Wipe error:', err);
+      setStatusMessage({ text: 'Failed to wipe database.', type: 'error' });
+    } finally {
+      setIsDeletingAll(false);
     }
   };
 
@@ -507,11 +544,21 @@ export default function App() {
         const authError = error as { code: string; message?: string };
         if (authError.code === 'auth/popup-closed-by-user') {
           message = 'Login popup was closed before completion.';
+        } else if (authError.code === 'auth/popup-blocked') {
+          message = 'Popups are blocked by your browser. Please allow popups for this site and try again.';
+        } else if (authError.code === 'auth/cancelled-popup-request') {
+          message = 'Previous login attempt was cancelled. Please try again.';
         } else if (authError.code === 'auth/unauthorized-domain') {
           message = 'This domain is not authorized in Firebase Console. Please add ' + window.location.hostname + ' to Authorized Domains.';
+        } else if (authError.message && (authError.message.includes('identity-toolkit-api') || authError.message.includes('requests-to-this-api-identitytoolkit-method'))) {
+          message = 'The Identity Toolkit API is disabled. Please visit https://console.developers.google.com/apis/api/identitytoolkit.googleapis.com/overview?project=1096745235194 and click ENABLE, then wait 5 minutes and retry.';
+        } else if (authError.message && authError.message.includes('INTERNAL ASSERTION FAILED')) {
+          message = 'A library sync error occurred. Please refresh the page and try logging in again.';
         } else if (authError.message) {
           message = authError.message;
         }
+      } else if (error instanceof Error && error.message.includes('INTERNAL ASSERTION FAILED')) {
+        message = 'A temporary connection error occurred. Please refresh and try again.';
       }
       setStatusMessage({ text: message, type: 'error' });
     }
@@ -1097,6 +1144,21 @@ export default function App() {
                         <Trash2 className="w-4 h-4" />
                       )}
                       Clean Duplicates
+                     </button>
+                     <button 
+                      onClick={handleDeleteAll}
+                      disabled={isDeletingAll}
+                      className={cn(
+                        "flex items-center gap-2 font-semibold text-sm transition-all",
+                        confirmDeleteAll ? "text-red-700 bg-red-100 px-2 py-1 rounded" : "text-red-600 hover:underline"
+                      )}
+                     >
+                      {isDeletingAll ? (
+                        <div className="w-4 h-4 border-2 border-red-200 border-t-red-600 rounded-full animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                      {confirmDeleteAll ? "CONFIRM DELETE" : "Delete All Data"}
                      </button>
                      <input 
                        type="file" 

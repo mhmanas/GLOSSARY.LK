@@ -57,10 +57,17 @@ npm start
 1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com).
 2. Enable **Firestore Database** and **Authentication** (Google Provider).
 3. Set up Firestore Security Rules using the provided `firestore.rules` file in this repository.
-4. **CRITICAL: Authorized Domains**:
-   - Go to **Firebase Console** > **Authentication** > **Settings** > **Authorized domains**.
-   - Add your custom domain (e.g., `glossary.lk`) AND the Netlify subdomain (e.g., `your-app.netlify.app`) to the list.
-   - If you don't do this, Google Login will fail.
+4. **CRITICAL: Production Setup Requirements**:
+   - **Authorized Domains**: Go to **Firebase Console** > **Authentication** > **Settings** > **Authorized domains**. Add `glossary.lk` and your Netlify URL.
+   - **Identity Toolkit API**: Firebase Auth requires this API to be enabled. Visit [this project-specific link](https://console.developers.google.com/apis/api/identitytoolkit.googleapis.com/overview?project=1096745235194) and click **ENABLE**.
+   - **API Key Restrictions**: If you still see "requests are blocked", go to **Google Cloud Console** > **APIs & Services** > **Credentials**, click your API key, and ensure the "Identity Toolkit API" is not restricted or is explicitly allowed.
+   - **Google Sign-In**: Ensure the Google sign-in provider is enabled in the Firebase Auth "Sign-in method" tab.
+
+### Admin Management
+- **Add Term/Category**: Use the "+" buttons in the header or results area.
+- **Clean Duplicates**: Click "Clean Duplicates" to remove entries with identical English terms.
+- **Delete All Data**: Click "Delete All Data" and then "CONFIRM DELETE" to permanently wipe the entire database (Terms and Categories).
+- **Import/Export**: Use the "Import CSV" button to batch upload terms.
 
 ## License
 
